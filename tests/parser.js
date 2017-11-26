@@ -44,7 +44,10 @@ describe('Loop grouping', () => {
     it('Empty grouping', () => {
         expect(parser('[[][[]]][][][]')).to.deep.equal({ success: true, tokens: [{ op: instructions.end }] })
     })
+    it('Simple grouping', () => {
+        expect(parser('[+++]')).to.deep.equal({ success: true, tokens: [{ op: instructions.loop, val: [{ op: instructions.add, val: 3 }] }, { op: instructions.end }] })
+    })
     it('Nested grouping', () => {
-        expect(parser('[[++]]')).to.deep.equal({ success: true, tokens: [{ op: instructions.loop, val: [{ op: instructions.loop, val: [{op: instructions.add, val: 2}] },] }, { op: instructions.end }] })
+        expect(parser('[[++]]')).to.deep.equal({ success: true, tokens: [{ op: instructions.loop, val: [{ op: instructions.loop, val: [{ op: instructions.add, val: 2 }] },] }, { op: instructions.end }] })
     })
 })

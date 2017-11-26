@@ -29,7 +29,7 @@ const group = tokens => {
     for (let token of tokens) {
         if (token === '[') {
             let token = { op: instructions.loop, val: [] }
-            stack.push(token)
+            pushList[0].push(token)
             pushList.unshift(token.val)
         } else if (token === ']') {
             if (pushList.length === 1) return [[], false]
@@ -44,6 +44,10 @@ const group = tokens => {
     return [[], false]
 }
 
+/**
+ * @param {string} code 
+ * @returns {{ success: boolean, tokens: [{op: sybmol, val:any}]}} 
+ */
 const parser = code => {
     const [tokens, success] = group(
         code
