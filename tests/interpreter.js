@@ -39,3 +39,21 @@ describe('Basic program', () => {
         expect(out).to.be.equal('\u0006')
     })
 })
+
+describe('Programs', () => {
+    it('Hello, world! (1)', async () => {
+        let code = `--<-<<+[+[<+>--->->->-<<<]>]<<--.<++++++.<<-..<<.<+.>>.>>.<<<.+++.>>.>>-.<<<+.`
+        let out = ''
+        let output = 'Hello, World!'
+        await brain(code, null, async data => { out += data }, async data => out = data)()
+        expect(out).to.be.equal(output)
+    })
+    it('Hello, world! (2)', async () => {
+        let code = `++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.`
+        let out = ''
+        let output = 'Hello World!\n'
+        await brain(code, null, async data => { out += data }, async data => out = data)()
+        expect(out).to.be.equal(output)
+
+    })
+})

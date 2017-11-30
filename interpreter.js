@@ -15,18 +15,21 @@ const createProgram = (code, stdin, stdout, end) => {
     const compile = tokens => tokens.map(({ op, val }) => {
         switch (op) {
             case instructions.add:
-                return async () => memory[dataPtr] = (memory[dataPtr] || 0 + 256 + val) % 256
+                return () => (memory[dataPtr] = (memory[dataPtr] + val + 256) % 256)
             case instructions.end:
-                return async () => end(out)
+                return async () => await end(out)
             case instructions.loop: {
                 const program = compile(val)
                 return async () => {
-                    // while (memory[dataPtr] !== 0)
-                        await run(program)
+                    while (memory[dataPtr] !== 0)
+                    await run(program)
                 }
             }
             case instructions.move:
-                return async () => dataPtr += val
+                return () => {
+                    if (memory[dataPtr += val] === undefined)
+                        memory[dataPtr] = 0
+                }
             case instructions.print:
                 return async () => await stdout(out += String.fromCharCode(memory[dataPtr] || 0).repeat(val))
             case instructions.read:
