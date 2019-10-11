@@ -3,12 +3,6 @@
   "version": "1.0.0",
   "description": "Brainfuck interpreter.",
   "main": "index.js",
-  "directories": {
-    "test": "tests"
-  },
-  "scripts": {
-    "test": "mocha ./tests/ --watch"
-  },
   "keywords": [
     "js",
     "node",
@@ -16,9 +10,5 @@
     "interpreter"
   ],
   "author": "Maciej Kozieja <koziejka.com@gmail.com>",
-  "license": "ISC",
-  "devDependencies": {
-    "chai": "^4.1.2",
-    "mocha": "^4.0.1"
-  }
+  "license": "ISC"
 }
