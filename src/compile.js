@@ -58,4 +58,61 @@ const compile = (program, { mode = runtimeMode.Sync, memSize = 30000 }) => {
   }
 }
 
+const compileToWat = (program) => {
+
+  const compile = ({ type, val }) => {
+    switch (type) {
+      case Loop: return loopImpl(val)
+      case Add: return val !== 0 ? addImpl(val) : ''
+      case Move: return val !== 0 ? moveImpl(val) : ''
+      case Print: return printImpl(val)
+      case Read: return readImpl()
+      case Program: return programImpl(val)
+    }
+  }
+  // TODO! fix loopImpl
+  const loopImpl = instructions => `
+  (loop
+  (get_global $ptr)
+  (i32.load8_u)
+  (if_br 0)
+  ${instructions.map(compile).join('\n')}
+  )`
+  const addImpl = val => `
+  (get_global $ptr)
+  (get_global $ptr)  
+  (i32.load8_u)
+  (i32.const ${val})
+  (i32.add) 
+  (i32.store8)`
+  const moveImpl = val => `
+  (get_global $ptr)
+  (i32.const ${val})
+  (i32.add)
+  (set_global $ptr)`
+  const printImpl = val => `
+  (get_global $ptr) 
+  (i32.load8_u)
+  (i32.const ${val})
+  (call $out)`
+  const readImpl = val => `
+  (get_global $ptr)
+  (call $in)
+  (i32.store8)`
+  const programImpl = val => `
+(module
+  (import "io" "in" (func $in (result i32)))
+  (import "io" "out" (func $out (param i32 i32)))
+
+  (global $ptr (mut i32) (i32.const 0))
+  (memory 1000)
+
+  (func $run 
+    ${val.map(compile).join('\n')}
+  )
+  (export "run" (func $run))
+)`
+
+  return compile(program)
+}
 module.exports = { compile, runtimeMode: { Sync, Async, Callback } }
