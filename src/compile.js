@@ -72,11 +72,20 @@ const compileToWat = (program) => {
   }
   // TODO! fix loopImpl
   const loopImpl = instructions => `
-  (loop
-  (get_global $ptr)
-  (i32.load8_u)
-  (if_br 0)
-  ${instructions.map(compile).join('\n')}
+  (block
+    (loop
+      (get_global $ptr)
+      (i32.load8_u)
+      (i32.const 0)
+      (i32.eq)
+      (br_if 1)
+
+      ${instructions.map(compile).join('\n')}
+
+      (get_global $ptr)
+      (i32.load8_u)
+      (br_if 0)
+    )
   )`
   const addImpl = val => `
   (get_global $ptr)
@@ -113,6 +122,6 @@ const compileToWat = (program) => {
   (export "run" (func $run))
 )`
 
-  return compile(program)
+  return compile(optimize(parse(program)))
 }
-module.exports = { compile, runtimeMode: { Sync, Async, Callback } }
+module.exports = { compile, compileToWat,  runtimeMode: { Sync, Async, Callback } }
