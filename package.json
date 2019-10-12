@@ -10,5 +10,8 @@
     "interpreter"
   ],
   "author": "Maciej Kozieja <koziejka.com@gmail.com>",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "wabt": "^1.0.12"
+  }
 }

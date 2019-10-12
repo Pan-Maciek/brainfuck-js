@@ -41,12 +41,12 @@ const compile = (program, { mode = Sync, memSize = 30000 }) => {
   const addImpl = val => `data[ptr] += ${val};`
   const moveImpl = val => `ptr += ${val};`
   const printImpl = val => {
-    if (mode !== Callback) return `out += String.fromCharCode(data[ptr]).repeat(${val});`
-    else return `callPrint(String.fromCharCode(data[ptr]));`.repeat(val)
+    if (mode !== Callback) return `var char = String.fromCharCode(data[ptr]).repeat(${val}); out += char; if(char[0] === '\\0') return out;`
+    else return `var char = String.fromCharCode(data[ptr]); callPrint(char); if(char[0] === '\\0') return;`.repeat(val)
   }
   const readImpl = () => {
     if (mode !== Sync) return `data[ptr] = (await read() || '\0').charCodeAt(0);`
-    else return 'data[ptr] = input[inPtr++].charCodeAt(0) | 0;\n'
+    else return 'data[ptr] = input.charCodeAt(inPtr++) | 0;'
   }
   const runtimeInit = () => {
     const memory = `let data = new Uint8Array(${memSize}), ptr = 0;`
@@ -103,6 +103,8 @@ i32.const ${val}
 i32.add
 set_local $ptr`
   const printImpl = val => `get_local $ptr
+(if (i32.eq (i32.load8_u) (i32.const 0)) (return))
+get_local $ptr
 i32.load8_u
 i32.const ${val}
 call $out`
