@@ -1,6 +1,7 @@
 const parse = require('./parse')
 const optimize = require('./optimize')
 const { Add, Move, Print, Read, Loop, Program } = require('./instructions')
+const { abs } = Math
 
 const Sync = Symbol('Sync')
 const Async = Symbol('Async')
@@ -58,7 +59,9 @@ const compile = (program, { mode = runtimeMode.Sync, memSize = 30000 }) => {
   }
 }
 
-const compileToWat = (program) => {
+const fixIndent = (n) => instruction => instruction.split('\n').map(x => `${n}${x}`).join('\n')
+
+const compileToWat = (program, { memSize = 30000 }) => {
 
   const compile = ({ type, val }) => {
     switch (type) {
@@ -70,58 +73,59 @@ const compileToWat = (program) => {
       case Program: return programImpl(val)
     }
   }
-  // TODO! fix loopImpl
+
   const loopImpl = instructions => `
   (block
     (loop
-      (get_global $ptr)
-      (i32.load8_u)
-      (i32.const 0)
-      (i32.eq)
-      (br_if 1)
-
-      ${instructions.map(compile).join('\n')}
-
-      (get_global $ptr)
-      (i32.load8_u)
-      (br_if 0)
+      get_local $ptr
+      i32.load8_u
+      i32.const 0
+      i32.eq
+      br_if 1
+      ${instructions.map(compile).map(fixIndent('    ')).join('\n')}
+      get_local $ptr
+      i32.load8_u
+      br_if 0
     )
   )`
   const addImpl = val => `
-  (get_global $ptr)
-  (get_global $ptr)  
-  (i32.load8_u)
-  (i32.const ${val})
-  (i32.add) 
-  (i32.store8)`
+  get_local $ptr
+  get_local $ptr  
+  i32.load8_u
+  i32.const ${abs(val)}
+  i32.${val > 0 ? 'add' : 'sub'} 
+  i32.store8`
   const moveImpl = val => `
-  (get_global $ptr)
-  (i32.const ${val})
-  (i32.add)
-  (set_global $ptr)`
+  get_local $ptr
+  i32.const ${val}
+  i32.add
+  set_local $ptr`
   const printImpl = val => `
-  (get_global $ptr) 
-  (i32.load8_u)
-  (i32.const ${val})
-  (call $out)`
+  get_local $ptr
+  i32.load8_u
+  i32.const ${val}
+  call $out`
   const readImpl = val => `
-  (get_global $ptr)
-  (call $in)
-  (i32.store8)`
+  get_local $ptr
+  call $in
+  i32.store8`
   const programImpl = val => `
-(module
+  (module
   (import "io" "in" (func $in (result i32)))
   (import "io" "out" (func $out (param i32 i32)))
 
   (global $ptr (mut i32) (i32.const 0))
-  (memory 1000)
+  (memory ${memSize})
 
   (func $run 
-    ${val.map(compile).join('\n')}
+    (local $ptr i32)
+    i32.const 0
+    set_local $ptr
+    ${val.map(compile).map(fixIndent('  ')).join('\n')}
   )
   (export "run" (func $run))
 )`
 
   return compile(optimize(parse(program)))
 }
-module.exports = { compile, compileToWat,  runtimeMode: { Sync, Async, Callback } }
+module.exports = { compile, compileToWat, runtimeMode: { Sync, Async, Callback } }
