@@ -1,13 +1,14 @@
 {
-  "name": "brainfuck",
-  "version": "1.0.0",
-  "description": "Brainfuck interpreter.",
+  "name": "brainfuck-compiler-js",
+  "version": "2.0.0",
+  "description": "Simple brainfuck compiler for javascript and webassembly.",
   "main": "index.js",
   "keywords": [
     "js",
     "node",
     "brainfuck",
-    "interpreter"
+    "compiler",
+    "webassembly"
   ],
   "author": "Maciej Kozieja <koziejka.com@gmail.com>",
   "license": "ISC",
